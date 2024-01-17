@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>PianoMan</title>
+	<style>
+		body{user-select:none;}
+		rect{stroke:black;stroke-width:2;cursor:pointer;}
+		text{font-family:sans-serif;font-size:1.2em;font-weight:bold;text-anchor:middle;fill:white;cursor:pointer;}
+		text.white{fill:black;}
+		.white {transition-duration:0.5s;fill:white;}
+		.black {transition-duration:0.5s;fill:black;}
+		.activa {transition-duration:0.1s;fill:#a0a0a0;}
+	</style>
+	<script defer src="Touch.js"></script>
+	<script defer src="PianoMan.js"></script>
+</head>
+
+<body>
+	<svg id="piano" width="632" height="220">
+		<rect x="1" y="1" width="45" height="218" class="white" id="k65"></rect><text x="24" y="205" class="white" id="c65">A</text>
+		<rect x="46" y="1" width="45" height="218" class="white" id="k83"></rect><text x="69" y="205" class="white" id="c83">S</text>
+		<rect x="91" y="1" width="45" height="218" class="white" id="k68"></rect><text x="114" y="205" class="white" id="c68">D</text>
+		<rect x="136" y="1" width="45" height="218" class="white" id="k70"></rect><text x="159" y="205" class="white" id="c70">F</text>
+		<rect x="181" y="1" width="45" height="218" class="white" id="k71"></rect><text x="204" y="205" class="white" id="c71">G</text>
+		<rect x="226" y="1" width="45" height="218" class="white" id="k72"></rect><text x="249" y="205" class="white" id="c72">H</text>
+		<rect x="271" y="1" width="45" height="218" class="white" id="k74"></rect><text x="294" y="205" class="white" id="c74">J</text>
+		<rect x="316" y="1" width="45" height="218" class="white" id="k82"></rect><text x="339" y="205" class="white" id="c82">R</text>
+		<rect x="361" y="1" width="45" height="218" class="white" id="k84"></rect><text x="384" y="205" class="white" id="c84">T</text>
+		<rect x="406" y="1" width="45" height="218" class="white" id="k89"></rect><text x="429" y="205" class="white" id="c89">Y</text>
+		<rect x="451" y="1" width="45" height="218" class="white" id="k85"></rect><text x="474" y="205" class="white" id="c85">U</text>
+		<rect x="496" y="1" width="45" height="218" class="white" id="k73"></rect><text x="519" y="205" class="white" id="c73">I</text>
+		<rect x="541" y="1" width="45" height="218" class="white" id="k79"></rect><text x="564" y="205" class="white" id="c79">O</text>
+		<rect x="586" y="1" width="45" height="218" class="white" id="k80"></rect><text x="609" y="205" class="white" id="c80">P</text>
+		<rect x="31" y="1" width="30" height="98" class="black" id="k49"></rect><text x="46" y="90" id="c49">1</text>
+		<rect x="76" y="1" width="30" height="98" class="black" id="k50"></rect><text x="91" y="90" id="c50">2</text>
+		<rect x="166" y="1" width="30" height="98" class="black" id="k51"></rect><text x="181" y="90" id="c51">3</text>
+		<rect x="211" y="1" width="30" height="98" class="black" id="k52"></rect><text x="226" y="90" id="c52">4</text>
+		<rect x="256" y="1" width="30" height="98" class="black" id="k53"></rect><text x="271" y="90" id="c53">5</text>
+		<rect x="346" y="1" width="30" height="98" class="black" id="k54"></rect><text x="361" y="90" id="c54">6</text>
+		<rect x="391" y="1" width="30" height="98" class="black" id="k55"></rect><text x="406" y="90" id="c55">7</text>
+		<rect x="481" y="1" width="30" height="98" class="black" id="k56"></rect><text x="496" y="90" id="c56">8</text>
+		<rect x="526" y="1" width="30" height="98" class="black" id="k57"></rect><text x="541" y="90" id="c57">9</text>
+		<rect x="571" y="1" width="30" height="98" class="black" id="k48"></rect><text x="586" y="90" id="c48">0</text>
+	</svg>
+</body>
+</html>
