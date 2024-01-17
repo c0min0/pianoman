@@ -71,7 +71,7 @@ function addListeners(id) {
 
 // Play note
 function playNote(note) {
-	let audio = new Audio(note + ".mp3");
+	let audio = new Audio(`./assets/notes/${note}.mp3`);
 	audio.play();
 }
 
