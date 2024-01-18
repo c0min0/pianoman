@@ -37,42 +37,78 @@ function init() {
 	// TouchEmulator();
 
 	// Add listeners for each virtual keys
-	for (let id in DATA) addListeners(id);
+	for (let id in DATA) addScreenListeners(id);
+
+	// Add listeners for physical keys
+	addKeyListeners();
 }
 
-// Add listeners
-function addListeners(id) {
-	const element = document.getElementById(id);
-    const { keys, note } = DATA[id];
+// Add Screen listeners
+function addScreenListeners(id) {
+    const element = document.getElementById(id);
 
-    // FOR KEY ELEMENTS
-    element.addEventListener("mousedown", () => playNote(note));
-    element.addEventListener("touchstart", (event) => {
-        if (event.touches.length > 1) event.preventDefault();	// Prevent gesture actions
-        playNote(note);
+    element.addEventListener("mousedown", () => {
+        activaTecla(element);
+        playNote(id);
     });
 
-    // FOR EACH PHYSICAL KEY
-    keys.forEach(key => {
-        // On keydown, set pressed to true and dispatch mousedown event for virtual key
-        document.addEventListener('keydown', (event) => {
-            if (event.key === key && !element.pressed) {
+    element.addEventListener("mouseup", () => desactivaTecla(element));
+	
+	// If mouse leaves the element while pressing
+	element.addEventListener("mouseleave", (event) => {
+        if (event.buttons === 1) desactivaTecla(element);	// If is left button
+    });
+
+    element.addEventListener("touchstart", (event) => {
+        if (event.touches.length > 1) event.preventDefault();	// Prevent gesture actions
+        activaTecla(element);
+        playNote(id);
+    });
+
+    element.addEventListener("touchend", () => desactivaTecla(element));
+}
+
+// Add Key listeners
+function addKeyListeners() {
+    document.addEventListener('keydown', (event) => {
+        for (let id in DATA) {
+            const element = document.getElementById(id);
+            const { keys } = DATA[id];
+            if (keys.includes(event.key) && !element.pressed) {
                 element.pressed = true;	// To avoid multiple keydown events
-                playNote(note);
+                activaTecla(element);
+                playNote(id);
             }
-        });
+        }
+    });
     
-        // On keyup, set pressed to false
-        document.addEventListener('keyup', (event) => {
-            if (event.key === key && element.pressed) element.pressed = false;
-        });
+    document.addEventListener('keyup', (event) => {
+        for (let id in DATA) {
+            const element = document.getElementById(id);
+            const { keys } = DATA[id];
+            if (keys.includes(event.key)) {
+                element.pressed = false;
+                desactivaTecla(element);
+            }
+        }
     });
 }
 
 // Play note
-function playNote(note) {
-	let audio = new Audio(`./assets/notes/${note}.mp3`);
-	audio.play();
+function playNote(id) {
+    const note = DATA[id].note;
+    let audio = new Audio(`./assets/notes/${note}.mp3`);
+    audio.play();
+}
+
+// Activa tecla
+function activaTecla(element) {
+	element.classList.add('activa');
+}
+
+// Desactiva tecla
+function desactivaTecla(element) {
+	element.classList.remove('activa');
 }
 
 // Init
