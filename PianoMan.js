@@ -4,112 +4,154 @@
 // Alumnes: Marc Peral i Víctor Comino
 ///////////////////////////////////////////////////////////
 
-// DATA OBJECT
-const DATA = {
-	"k65": { keys: ["a"], note: "c1", pressed: false },
-	"k83": { keys: ["s"], note: "d1", pressed: false },
-	"k68": { keys: ["d"], note: "e1", pressed: false },
-	"k70": { keys: ["f"], note: "f1", pressed: false },
-	"k71": { keys: ["g", "q"], note: "g1", pressed: false },
-	"k72": { keys: ["h", "w"], note: "a1", pressed: false },
-	"k74": { keys: ["j", "e"], note: "b1", pressed: false },
-	"k82": { keys: ["r", "k"], note: "c2", pressed: false },
-	"k84": { keys: ["t", "l"], note: "d2", pressed: false },
-	"k89": { keys: ["y", "ñ"], note: "e2", pressed: false },
-	"k85": { keys: ["u"], note: "f2", pressed: false },
-	"k73": { keys: ["i"], note: "g2", pressed: false },
-	"k79": { keys: ["o"], note: "a2", pressed: false },
-	"k80": { keys: ["p"], note: "b2", pressed: false },
-	"k49": { keys: ["1"], note: "c1s", pressed: false },
-	"k50": { keys: ["2"], note: "d1s", pressed: false },
-	"k51": { keys: ["3"], note: "f1s", pressed: false },
-	"k52": { keys: ["4"], note: "g1s", pressed: false },
-	"k53": { keys: ["5"], note: "a1s", pressed: false },
-	"k54": { keys: ["6"], note: "c2s", pressed: false },
-	"k55": { keys: ["7"], note: "d2s", pressed: false },
-	"k56": { keys: ["8"], note: "f2s", pressed: false },
-	"k57": { keys: ["9"], note: "g2s", pressed: false },
-	"k48": { keys: ["0"], note: "a2s", pressed: false }
+
+
+// DATA
+const keysData = {
+	"k65": { keys: ["a"], note: "c1" },
+	"k83": { keys: ["s"], note: "d1" },
+	"k68": { keys: ["d"], note: "e1" },
+	"k70": { keys: ["f"], note: "f1" },
+	"k71": { keys: ["g", "q"], note: "g1" },
+	"k72": { keys: ["h", "w"], note: "a1" },
+	"k74": { keys: ["j", "e"], note: "b1" },
+	"k82": { keys: ["r", "k"], note: "c2" },
+	"k84": { keys: ["t", "l"], note: "d2" },
+	"k89": { keys: ["y", "ñ"], note: "e2" },
+	"k85": { keys: ["u"], note: "f2" },
+	"k73": { keys: ["i"], note: "g2" },
+	"k79": { keys: ["o"], note: "a2" },
+	"k80": { keys: ["p"], note: "b2" },
+	"k49": { keys: ["1"], note: "c1s" },
+	"k50": { keys: ["2"], note: "d1s" },
+	"k51": { keys: ["3"], note: "f1s" },
+	"k52": { keys: ["4"], note: "g1s" },
+	"k53": { keys: ["5"], note: "a1s" },
+	"k54": { keys: ["6"], note: "c2s" },
+	"k55": { keys: ["7"], note: "d2s" },
+	"k56": { keys: ["8"], note: "f2s" },
+	"k57": { keys: ["9"], note: "g2s" },
+	"k48": { keys: ["0"], note: "a2s" }
 };
 
-function init() {
-	// To simulate touch events on desktop
-	// TouchEmulator();
+const activeKeys = {
+	mouse: new Set(),
+	touch: new Set(),
+	keyboard: new Set()
+};
 
-	// Add listeners for each virtual keys
-	for (let id in DATA) addScreenListeners(id);
+// LISTENERS
+function addMouseListeners(keys) {
+	$(document).on("mousemove mousedown mouseup", handleMouse);
 
-	// Add listeners for physical keys
-	addKeyListeners();
+	function handleMouse(event) {
+		keys.each(function () {
+			const key = $(this);
+			const isTouched = isInsideKey(event, this) && event.buttons === 1;	// Check if mouse is inside key and left button is pressed
+			isTouched ? playNoteAndSetActive(key, 'mouse') : removeActive(key, 'mouse');
+		});
+	}
 }
 
-// Add Screen listeners
-function addScreenListeners(id) {
-    const element = document.getElementById(id);
+function addTouchListeners(keys) {
+	// It's necessary to add the { passive: false } option to use preventDefault() in touch events
+	document.addEventListener("touchmove", handleTouch, { passive: false });
+	document.addEventListener("touchstart", handleTouch, { passive: false });
+	document.addEventListener("touchend", handleTouch, { passive: false });
 
-    element.addEventListener("mousedown", () => {
-        activaTecla(element);
-        playNote(id);
-    });
+	function handleTouch(event) {
+		event.preventDefault(); // To avoid touch actions (scroll, zoom...)
+		const touches = Array.from(event.touches); // Array of actual touches
 
-    element.addEventListener("mouseup", () => desactivaTecla(element));
-	
-	// If mouse leaves the element while pressing
-	element.addEventListener("mouseleave", (event) => {
-        if (event.buttons === 1) desactivaTecla(element);	// If is left button
-    });
-
-    element.addEventListener("touchstart", (event) => {
-        if (event.touches.length > 1) event.preventDefault();	// Prevent gesture actions
-        activaTecla(element);
-        playNote(id);
-    });
-
-    element.addEventListener("touchend", () => desactivaTecla(element));
+		keys.each(function () {
+			const key = $(this);
+			const isTouched = touches.some(touch => isInsideKey(touch, this));
+			isTouched ? playNoteAndSetActive(key, 'touch') : removeActive(key, 'touch');
+		});
+	}
 }
 
-// Add Key listeners
-function addKeyListeners() {
-    document.addEventListener('keydown', (event) => {
-        for (let id in DATA) {
-            const element = document.getElementById(id);
-            const { keys } = DATA[id];
-            if (keys.includes(event.key) && !element.pressed) {
-                element.pressed = true;	// To avoid multiple keydown events
-                activaTecla(element);
-                playNote(id);
-            }
-        }
-    });
-    
-    document.addEventListener('keyup', (event) => {
-        for (let id in DATA) {
-            const element = document.getElementById(id);
-            const { keys } = DATA[id];
-            if (keys.includes(event.key)) {
-                element.pressed = false;
-                desactivaTecla(element);
-            }
-        }
-    });
+function addKeyListeners(keys) {
+	$(document).on({
+		'keydown': (event) => handleKeyEvent(event, true),
+		'keyup': (event) => handleKeyEvent(event, false)
+	});
+
+	function handleKeyEvent(event, isKeyDown) {
+		keys.each(function () {
+			const key = $(this);
+			const phisicalKeys = keysData[key.attr('id')].keys;
+
+			if (phisicalKeys.includes(event.key)) {
+				isKeyDown ? playNoteAndSetActive(key, 'keyboard') : removeActive(key, 'keyboard');
+			}
+		});
+	}
 }
 
-// Play note
+// HELPERS
+function isInsideKey(event, key) {
+	const boundingBox = key.getBoundingClientRect();
+	return event.clientX >= boundingBox.left &&
+		event.clientX <= boundingBox.right &&
+		event.clientY >= boundingBox.top &&
+		event.clientY <= boundingBox.bottom;
+}
+
+function playNoteAndSetActive(key, eventType) {
+	const id = key.attr('id');
+	if (!key.hasClass("activa") && !isActive(id)) {
+		key.addClass("activa");
+		playNote(id);
+		activeKeys[eventType].add(id);
+	}
+}
+
+function removeActive(key, eventType) {
+	const id = key.attr('id');
+	activeKeys[eventType].delete(id);
+	if (!isActive(id)) {
+		key.removeClass("activa");
+	}
+}
+
 function playNote(id) {
-    const note = DATA[id].note;
-    let audio = new Audio(`./assets/notes/${note}.mp3`);
-    audio.play();
+	if (!isActive(id)) {
+		const note = keysData[id].note;
+		let audio = new Audio(`./assets/notes/${note}.mp3`);
+		audio.play();
+	}
 }
 
-// Activa tecla
-function activaTecla(element) {
-	element.classList.add('activa');
+function isActive(id) {
+	return activeKeys.mouse.has(id) || activeKeys.touch.has(id) || activeKeys.keyboard.has(id);
 }
 
-// Desactiva tecla
-function desactivaTecla(element) {
-	element.classList.remove('activa');
-}
+// INIT
+(() => {
+	// Hide the SVG initially
+	$('svg').hide();
 
-// Init
-init();
+	// Add a start button
+	const startButton = $('<button>').text('Start');
+
+	// Add a listener to the start button
+	startButton.on('click touchend', function () {
+		// Remove the start button
+		this.remove();
+
+		// Add listeners
+		const keys = $('rect');
+		addMouseListeners(keys);
+		addTouchListeners(keys);
+		addKeyListeners(keys);
+
+		// Show the SVG
+		$('svg').show();
+	});
+
+	// Add the start button to the body
+	$('body').append(startButton);
+})();
+
+// * It's necessary add a first interaction before play the notes touching the screen bacause browsers block the audio for security reasons
