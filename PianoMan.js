@@ -4,128 +4,39 @@
 // Alumnes: Marc Peral i Víctor Comino
 ///////////////////////////////////////////////////////////
 
-
-
 // DATA
-const keysData = {
-	"k65": { keys: ["a"], note: "c1" },
-	"k83": { keys: ["s"], note: "d1" },
-	"k68": { keys: ["d"], note: "e1" },
-	"k70": { keys: ["f"], note: "f1" },
-	"k71": { keys: ["g", "q"], note: "g1" },
-	"k72": { keys: ["h", "w"], note: "a1" },
-	"k74": { keys: ["j", "e"], note: "b1" },
-	"k82": { keys: ["r", "k"], note: "c2" },
-	"k84": { keys: ["t", "l"], note: "d2" },
-	"k89": { keys: ["y", "ñ"], note: "e2" },
-	"k85": { keys: ["u"], note: "f2" },
-	"k73": { keys: ["i"], note: "g2" },
-	"k79": { keys: ["o"], note: "a2" },
-	"k80": { keys: ["p"], note: "b2" },
-	"k49": { keys: ["1"], note: "c1s" },
-	"k50": { keys: ["2"], note: "d1s" },
-	"k51": { keys: ["3"], note: "f1s" },
-	"k52": { keys: ["4"], note: "g1s" },
-	"k53": { keys: ["5"], note: "a1s" },
-	"k54": { keys: ["6"], note: "c2s" },
-	"k55": { keys: ["7"], note: "d2s" },
-	"k56": { keys: ["8"], note: "f2s" },
-	"k57": { keys: ["9"], note: "g2s" },
-	"k48": { keys: ["0"], note: "a2s" }
-};
+const keysData = [
+	{ note: "c1", keys: ["a"], ids: ["k65", "c65"] },
+	{ note: "d1", keys: ["s"], ids: ["k83", "c83"] },
+	{ note: "e1", keys: ["d"], ids: ["k68", "c68"] },
+	{ note: "f1", keys: ["f"], ids: ["k70", "c70"] },
+	{ note: "g1", keys: ["g", "q"], ids: ["k71", "c71"] },
+	{ note: "a1", keys: ["h", "w"], ids: ["k72", "c72"] },
+	{ note: "b1", keys: ["j", "e"], ids: ["k74", "c74"] },
+	{ note: "c2", keys: ["r", "k"], ids: ["k82", "c82"] },
+	{ note: "d2", keys: ["t", "l"], ids: ["k84", "c84"] },
+	{ note: "e2", keys: ["y", "ñ"], ids: ["k89", "c89"] },
+	{ note: "f2", keys: ["u"], ids: ["k85", "c85"] },
+	{ note: "g2", keys: ["i"], ids: ["k73", "c73"] },
+	{ note: "a2", keys: ["o"], ids: ["k79", "c79"] },
+	{ note: "b2", keys: ["p"], ids: ["k80", "c80"] },
+	{ note: "c1s", keys: ["1"], ids: ["k49", "c49"] },
+	{ note: "d1s", keys: ["2"], ids: ["k50", "c50"] },
+	{ note: "f1s", keys: ["3"], ids: ["k51", "c51"] },
+	{ note: "g1s", keys: ["4"], ids: ["k52", "c52"] },
+	{ note: "a1s", keys: ["5"], ids: ["k53", "c53"] },
+	{ note: "c2s", keys: ["6"], ids: ["k54", "c54"] },
+	{ note: "d2s", keys: ["7"], ids: ["k55", "c55"] },
+	{ note: "f2s", keys: ["8"], ids: ["k56", "c56"] },
+	{ note: "g2s", keys: ["9"], ids: ["k57", "c57"] },
+	{ note: "a2s", keys: ["0"], ids: ["k48", "c48"] }
+];
 
 const activeKeys = {
 	mouse: new Set(),
 	touch: new Set(),
 	keyboard: new Set()
 };
-
-// LISTENERS
-function addMouseListeners(keys) {
-	$(document).on("mousemove mousedown mouseup", handleMouse);
-
-	function handleMouse(event) {
-		keys.each(function () {
-			const key = $(this);
-			const isTouched = isInsideKey(event, this) && event.buttons === 1;	// Check if mouse is inside key and left button is pressed
-			isTouched ? playNoteAndSetActive(key, 'mouse') : removeActive(key, 'mouse');
-		});
-	}
-}
-
-function addTouchListeners(keys) {
-	// It's necessary to add the { passive: false } option to use preventDefault() in touch events
-	document.addEventListener("touchmove", handleTouch, { passive: false });
-	document.addEventListener("touchstart", handleTouch, { passive: false });
-	document.addEventListener("touchend", handleTouch, { passive: false });
-
-	function handleTouch(event) {
-		event.preventDefault(); // To avoid touch actions (scroll, zoom...)
-		const touches = Array.from(event.touches); // Array of actual touches
-
-		keys.each(function () {
-			const key = $(this);
-			const isTouched = touches.some(touch => isInsideKey(touch, this));
-			isTouched ? playNoteAndSetActive(key, 'touch') : removeActive(key, 'touch');
-		});
-	}
-}
-
-function addKeyListeners(keys) {
-	$(document).on({
-		'keydown': (event) => handleKeyEvent(event, true),
-		'keyup': (event) => handleKeyEvent(event, false)
-	});
-
-	function handleKeyEvent(event, isKeyDown) {
-		keys.each(function () {
-			const key = $(this);
-			const phisicalKeys = keysData[key.attr('id')].keys;
-
-			if (phisicalKeys.includes(event.key)) {
-				isKeyDown ? playNoteAndSetActive(key, 'keyboard') : removeActive(key, 'keyboard');
-			}
-		});
-	}
-}
-
-// HELPERS
-function isInsideKey(event, key) {
-	const boundingBox = key.getBoundingClientRect();
-	return event.clientX >= boundingBox.left &&
-		event.clientX <= boundingBox.right &&
-		event.clientY >= boundingBox.top &&
-		event.clientY <= boundingBox.bottom;
-}
-
-function playNoteAndSetActive(key, eventType) {
-	const id = key.attr('id');
-	if (!key.hasClass("activa") && !isActive(id)) {
-		key.addClass("activa");
-		playNote(id);
-		activeKeys[eventType].add(id);
-	}
-}
-
-function removeActive(key, eventType) {
-	const id = key.attr('id');
-	activeKeys[eventType].delete(id);
-	if (!isActive(id)) {
-		key.removeClass("activa");
-	}
-}
-
-function playNote(id) {
-	if (!isActive(id)) {
-		const note = keysData[id].note;
-		let audio = new Audio(`./assets/notes/${note}.mp3`);
-		audio.play();
-	}
-}
-
-function isActive(id) {
-	return activeKeys.mouse.has(id) || activeKeys.touch.has(id) || activeKeys.keyboard.has(id);
-}
 
 // INIT
 (() => {
@@ -141,10 +52,10 @@ function isActive(id) {
 		this.remove();
 
 		// Add listeners
-		const keys = $('rect');
-		addMouseListeners(keys);
-		addTouchListeners(keys);
-		addKeyListeners(keys);
+		const elements = $('rect, text');
+		addMouseListeners(elements);
+		addTouchListeners(elements);
+		addKeyListeners();
 
 		// Show the SVG
 		$('svg').show();
@@ -154,4 +65,87 @@ function isActive(id) {
 	$('body').append(startButton);
 })();
 
-// * It's necessary add a first interaction before play the notes touching the screen bacause browsers block the audio for security reasons
+/*
+ * It's necessary add a first interaction before 
+ * play the notes touching the screen bacause 
+ * browsers block the audio for security reasons
+ */ 
+
+// LISTENERS
+function addMouseListeners(elements) {
+	$(document).on("mousemove mousedown mouseup", (event) => {
+		elements.each(function () {
+			const key = selectKey($(this));
+			const isTouched = isInsideKey(event, key) && event.buttons === 1;	// Check if mouse is inside key and left button is pressed
+			isTouched ? press(key, 'mouse') : release(key, 'mouse');
+		});
+	});
+}
+
+function addTouchListeners(elements) {
+	// It's necessary to add the { passive: false } option to use preventDefault() in touch events
+	document.addEventListener("touchmove", handleTouch, { passive: false });
+	document.addEventListener("touchstart", handleTouch, { passive: false });
+	document.addEventListener("touchend", handleTouch, { passive: false });
+
+	function handleTouch(event) {
+		event.preventDefault(); // To avoid touch actions (scroll, zoom...)
+		const touches = Array.from(event.touches); // Array of actual touches
+
+		elements.each(function () {
+			const key = selectKey($(this));
+			const isTouched = touches.some(touch => isInsideKey(touch, key));
+			isTouched ? press(key, 'touch') : release(key, 'touch');
+		});
+	}
+}
+
+function addKeyListeners() {
+	$(document).on({
+		'keydown': (event) => handleKeyEvent(event, true),
+		'keyup': (event) => handleKeyEvent(event, false)
+	});
+
+	function handleKeyEvent(event, isKeyDown) {
+		const note = keysData.find(data => data.keys.includes(event.key));
+		if (note) {
+			const key = $(`#${note.ids[0]}`).get(0);
+			isKeyDown ? press(key, 'keyboard') : release(key, 'keyboard');
+		}
+	}
+}
+
+// HELPERS
+function selectKey(element) {
+	return element.is('rect') ? element.get(0) : element.prev().get(0);
+}
+
+function isInsideKey(event, key) {
+	const elementAtPoint = document.elementFromPoint(event.clientX, event.clientY);
+	return elementAtPoint === key || elementAtPoint.previousSibling === key;
+}
+
+function press(key, eventType) {
+	if (!isActive(key.id)) {
+		$(key).addClass("activa");
+		playNote(key.id);
+	}
+	activeKeys[eventType].add(key.id);
+}
+
+function release(key, eventType) {
+	activeKeys[eventType].delete(key.id);
+	!isActive(key.id) && $(key).removeClass("activa");
+}
+
+function isActive(id) {
+	return activeKeys.mouse.has(id) || activeKeys.touch.has(id) || activeKeys.keyboard.has(id);
+}
+
+function playNote(id) {
+	if (!isActive(id)) {
+		const note = keysData.find(data => data.ids.includes(id)).note;
+		let audio = new Audio(`./assets/notes/${note}.mp3`);
+		audio.play();
+	}
+}
