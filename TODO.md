@@ -1,0 +1,5 @@
+- [X] Que el teclat o el ratolí enfonsi les tecles
+- [X] Que solo haya un listener para teclado
+- [X] FIX: phisical keyboard while mouse is moving
+- [X] FIX: sustained/sharp notes play the adjacent note
+- [X] FIX: touch/mouse + keyboard in same note, when release any of two, it plays again

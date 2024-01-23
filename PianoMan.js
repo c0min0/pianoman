@@ -32,6 +32,7 @@ const keysData = [
 	{ note: "a2s", keys: ["0"], ids: ["k48", "c48"] }
 ];
 
+// To aviod interaction conflicts between mouse, touch and keyboard
 const activeKeys = {
 	mouse: new Set(),
 	touch: new Set(),
@@ -48,16 +49,14 @@ const activeKeys = {
 
 	// Add a listener to the start button
 	startButton.on('click touchend', function () {
-		// Remove the start button
-		this.remove();
-
 		// Add listeners
 		const elements = $('rect, text');
 		addMouseListeners(elements);
 		addTouchListeners(elements);
 		addKeyListeners();
 
-		// Show the SVG
+		// Remove the start button and show the SVG
+		this.remove();
 		$('svg').show();
 	});
 
@@ -75,8 +74,8 @@ const activeKeys = {
 function addMouseListeners(elements) {
 	$(document).on("mousemove mousedown mouseup", (event) => {
 		elements.each(function () {
-			const key = selectKey($(this));
-			const isTouched = isInsideKey(event, key) && event.buttons === 1;	// Check if mouse is inside key and left button is pressed
+			const key = selectKey(this);
+			const isTouched = isInsideKey(event, key) && event.buttons === 1;	// event.buttons === 1 -> left button
 			isTouched ? press(key, 'mouse') : release(key, 'mouse');
 		});
 	});
@@ -90,10 +89,10 @@ function addTouchListeners(elements) {
 
 	function handleTouch(event) {
 		event.preventDefault(); // To avoid touch actions (scroll, zoom...)
-		const touches = Array.from(event.touches); // Array of actual touches
+		const touches = Array.from(event.touches);
 
 		elements.each(function () {
-			const key = selectKey($(this));
+			const key = selectKey(this);
 			const isTouched = touches.some(touch => isInsideKey(touch, key));
 			isTouched ? press(key, 'touch') : release(key, 'touch');
 		});
@@ -107,9 +106,9 @@ function addKeyListeners() {
 	});
 
 	function handleKeyEvent(event, isKeyDown) {
-		const note = keysData.find(data => data.keys.includes(event.key));
-		if (note) {
-			const key = $(`#${note.ids[0]}`).get(0);
+		const noteData = keysData.find(data => data.keys.includes(event.key));
+		if (noteData) {
+			const key = $(`#${noteData.ids[0]}`).get(0);
 			isKeyDown ? press(key, 'keyboard') : release(key, 'keyboard');
 		}
 	}
@@ -117,7 +116,8 @@ function addKeyListeners() {
 
 // HELPERS
 function selectKey(element) {
-	return element.is('rect') ? element.get(0) : element.prev().get(0);
+	const jqElem = $(element);
+	return jqElem.is('rect') ? jqElem.get(0) : jqElem.prev().get(0);
 }
 
 function isInsideKey(event, key) {
