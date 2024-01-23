@@ -68,7 +68,7 @@ const activeKeys = {
  * It's necessary add a first interaction before 
  * play the notes touching the screen bacause 
  * browsers block the audio for security reasons
- */ 
+ */
 
 // LISTENERS
 function addMouseListeners(elements) {
@@ -143,9 +143,7 @@ function isActive(id) {
 }
 
 function playNote(id) {
-	if (!isActive(id)) {
-		const note = keysData.find(data => data.ids.includes(id)).note;
-		let audio = new Audio(`./assets/notes/${note}.mp3`);
-		audio.play();
-	}
+	const note = keysData.find(data => data.ids.includes(id)).note;
+	let audio = new Audio(`./assets/notes/${note}.mp3`);
+	audio.play();
 }
